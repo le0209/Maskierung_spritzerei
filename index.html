@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maskierprozess-Erfassung</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f2f5; color: #1a1a1a; padding: 16px; }
+  h1 { font-size: 18px; font-weight: 700; color: #1a3a5c; margin-bottom: 3px; }
+  .subtitle { font-size: 12px; color: #777; margin-bottom: 16px; }
+  .card { background: #fff; border: 1px solid #dde3ea; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .sec-title { font-size: 11px; font-weight: 700; color: #1a3a5c; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
+  input[type=text], input[type=date], input[type=number], select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid #cdd5de; border-radius: 6px;
+    font-size: 13px; color: #1a1a1a; margin-bottom: 10px; background: #fff;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #2980b9; border-color: #2980b9; }
+  textarea { height: 60px; resize: vertical; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .f { margin-bottom: 0; }
+  .f input, .f select, .f textarea { margin-bottom: 0; }
+  .btn-save { background: #1a3a5c; color: #fff; border: none; border-radius: 8px; padding: 12px 0; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 4px; }
+  .btn-save:active { background: #0f2540; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 6px; border: 1px solid #cdd5de; background: #f0f2f5; color: #333; cursor: pointer; }
+  .btn-danger { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c2; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+  .btn-export { background: #eaf3e8; color: #1a5c2a; border: 1px solid #b8ddb3; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .timer-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .timer-disp { font-size: 24px; font-weight: 700; color: #1a3a5c; min-width: 72px; font-variant-numeric: tabular-nums; }
+  .timer-btn { padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid #cdd5de; background: #f0f2f5; color: #333; cursor: pointer; }
+  .timer-btn.running { background: #fdecea; color: #c0392b; border-color: #f5c6c2; }
+  .maskier-pill { background: #e8f5fe; color: #1560a8; border: 1px solid #b3d9f5; border-radius: 6px; padding: 7px 12px; font-size: 13px; font-weight: 600; display: inline-block; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; color: #555; font-weight: 600; font-size: 11px; border-bottom: 1px solid #dde3ea; padding: 6px 8px; background: #f8f9fa; }
+  td { padding: 6px 8px; border-bottom: 1px solid #f0f2f4; vertical-align: top; }
+  .empty-state { text-align: center; padding: 24px; color: #aaa; font-size: 13px; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #d6e8f5; color: #1a3a5c; font-weight: 600; }
+  #counter { background: #d6e8f5; color: #1a3a5c; border-radius: 10px; padding: 1px 8px; font-size: 11px; font-weight: 700; margin-left: 6px; }
+  .scroll-table { max-height: 260px; overflow-y: auto; }
+  .export-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+</style>
+</head>
+<body>
+
+<h1>Maskierprozess-Erfassung</h1>
+<p class="subtitle">Klebeband-Maskierung &middot; Sto&szlig;f&auml;nger &middot; Beobachtungsformular</p>
+
+<div class="card">
+  <p class="sec-title">&#128197; Grunddaten</p>
+  <div class="g3">
+    <div class="f"><label>Datum</label><input type="date" id="datum"></div>
+    <div class="f"><label>Beobachter</label><input type="text" id="beobachter" placeholder="Name"></div>
+    <div class="f"><label>Schicht</label>
+      <select id="schicht">
+        <option value="">&#8211; w&#228;hlen &#8211;</option>
+        <option>Fr&#252;hschicht</option><option>Sp&#228;tschicht</option><option>Nachtschicht</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec-title">&#128230; Produkt &amp; Maskierposition</p>
+  <div class="g2" style="margin-bottom:10px;">
+    <div class="f"><label>Produktname</label><input type="text" id="produkt" placeholder="z.B. Frontsto&szlig;f&auml;nger ID Buzz"></div>
+    <div class="f"><label>Maskierungsart</label><div class="maskier-pill">&#127991; Klebeband</div></div>
+  </div>
+  <div class="g2" style="margin-bottom:10px;">
+    <div class="f"><label>Bauteil</label>
+      <select id="bauteil">
+        <option value="">&#8211; w&#228;hlen &#8211;</option>
+        <option>Front</option><option>Heck</option>
+      </select>
+    </div>
+    <div class="f"><label>Maskierposition</label><input type="text" id="position" placeholder="z.B. PDC-Bohrungen links"></div>
+  </div>
+  <div class="f">
+    <label>Beschreibung / Besonderheiten</label>
+    <textarea id="beschreibung" placeholder="Schwierigkeiten, Klebeprobleme, Kurven&hellip;"></textarea>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec-title">&#9200; Zeiten &amp; Takt</p>
+  <div class="g2" style="margin-bottom:10px;">
+    <div class="f">
+      <label>Prozesszeit messen</label>
+      <div class="timer-row">
+        <span class="timer-disp" id="td1">00:00</span>
+        <button class="timer-btn" id="tb1_start" onclick="startTimer('proc')">Start</button>
+        <button class="timer-btn" id="tb1_stop" onclick="stopTimer('proc')" disabled style="opacity:0.4;">Stop</button>
+        <button class="btn-sm" onclick="resetTimer('proc')">Reset</button>
+      </div>
+      <input type="text" id="pz_disp" placeholder="oder manuell: 1:45 (min:sek)" style="margin-bottom:0;">
+      <input type="hidden" id="pz_s" value="0">
+    </div>
+    <div class="f">
+      <label>Pause zwischen Bauteilen</label>
+      <div class="timer-row">
+        <span class="timer-disp" id="td2">00:00</span>
+        <button class="timer-btn" id="tb2_start" onclick="startTimer('pause')">Start</button>
+        <button class="timer-btn" id="tb2_stop" onclick="stopTimer('pause')" disabled style="opacity:0.4;">Stop</button>
+        <button class="btn-sm" onclick="resetTimer('pause')">Reset</button>
+      </div>
+      <input type="text" id="pa_disp" placeholder="oder manuell: 0:30 (min:sek)" style="margin-bottom:0;">
+      <input type="hidden" id="pa_s" value="0">
+    </div>
+  </div>
+  <div class="g2">
+    <div class="f"><label>Messungen / Durchl&auml;ufe</label><input type="number" id="messungen" min="1" value="1"></div>
+    <div class="f"><label>Taktzeit (s)</label><input type="number" id="taktzeit" placeholder="Sekunden"></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec-title">&#128101; Personal</p>
+  <div class="g2">
+    <div class="f"><label>Anzahl Mitarbeiter</label><input type="number" id="mitarbeiter" min="1" value="1"></div>
+    <div class="f"><label>Einseitig / beidseitig</label>
+      <select id="seite">
+        <option value="">&#8211; w&#228;hlen &#8211;</option>
+        <option>Einseitig</option><option>Beidseitig</option><option>Rundherum</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec-title">&#9888; Qualit&auml;t &amp; Bemerkungen</p>
+  <div class="f" style="margin-bottom:10px;"><label>Fehler / Probleme</label><input type="text" id="fehler" placeholder="z.B. Klebeband hebt sich an Kurven ab"></div>
+  <div class="f"><label>Bemerkungen</label><textarea id="bemerkungen" placeholder="Ideen, Beobachtungen&hellip;"></textarea></div>
+</div>
+
+<button class="btn-save" onclick="saveEntry()">+ Eintrag speichern</button>
+<div style="height:16px;"></div>
+
+<div class="card">
+  <p class="sec-title" style="display:flex;align-items:center;">&#128203; Erfasste Eintr&auml;ge <span id="counter">0</span></p>
+  <div class="scroll-table">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Datum</th><th>Produkt</th><th>Bauteil</th><th>Position</th>
+        <th>Prozess (s)</th><th>Pause (s)</th><th>MA</th><th></th>
+      </tr></thead>
+      <tbody id="entries-body">
+        <tr><td colspan="9" class="empty-state">Noch keine Eintr&auml;ge.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="export-row">
+    <button class="btn-export" onclick="exportCSV()">&#8595; CSV exportieren</button>
+    <button class="btn-export" onclick="exportJSON()" style="background:#f0eafc;color:#4a1580;border-color:#c9a8f5;">&#8595; JSON exportieren</button>
+    <button class="btn-danger" onclick="clearAll()" style="margin-left:auto;">Alle l&ouml;schen</button>
+  </div>
+</div>
+
+<script>
+let entries = JSON.parse(localStorage.getItem('maskier_final') || '[]');
+let timerInt = { proc: null, pause: null };
+let timerSec = { proc: 0, pause: 0 };
+let timerRun = { proc: false, pause: false };
+
+function fmt(s) { return Math.floor(s/60).toString().padStart(2,'0')+':'+(s%60).toString().padStart(2,'0'); }
+
+function startTimer(k) {
+  if (timerRun[k]) return;
+  timerRun[k] = true;
+  document.getElementById(k==='proc'?'tb1_start':'tb2_start').disabled = true;
+  document.getElementById(k==='proc'?'tb1_start':'tb2_start').style.opacity = '0.4';
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').disabled = false;
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').style.opacity = '1';
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').classList.add('running');
+  timerInt[k] = setInterval(() => {
+    timerSec[k]++;
+    document.getElementById(k==='proc'?'td1':'td2').textContent = fmt(timerSec[k]);
+    document.getElementById(k==='proc'?'pz_s':'pa_s').value = timerSec[k];
+  }, 1000);
+}
+function stopTimer(k) {
+  if (!timerRun[k]) return;
+  timerRun[k] = false;
+  clearInterval(timerInt[k]);
+  document.getElementById(k==='proc'?'tb1_start':'tb2_start').disabled = false;
+  document.getElementById(k==='proc'?'tb1_start':'tb2_start').style.opacity = '1';
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').disabled = true;
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').style.opacity = '0.4';
+  document.getElementById(k==='proc'?'tb1_stop':'tb2_stop').classList.remove('running');
+  document.getElementById(k==='proc'?'pz_disp':'pa_disp').value = fmt(timerSec[k]);
+}
+function resetTimer(k) {
+  stopTimer(k);
+  timerSec[k] = 0;
+  document.getElementById(k==='proc'?'td1':'td2').textContent = '00:00';
+  document.getElementById(k==='proc'?'pz_s':'pa_s').value = 0;
+  document.getElementById(k==='proc'?'pz_disp':'pa_disp').value = '';
+}
+document.getElementById('pz_disp').addEventListener('input', function() {
+  const m = this.value.match(/^(\d+):(\d{1,2})$/);
+  if (m) { const s=+m[1]*60+ +m[2]; timerSec.proc=s; document.getElementById('pz_s').value=s; document.getElementById('td1').textContent=fmt(s); }
+});
+document.getElementById('pa_disp').addEventListener('input', function() {
+  const m = this.value.match(/^(\d+):(\d{1,2})$/);
+  if (m) { const s=+m[1]*60+ +m[2]; timerSec.pause=s; document.getElementById('pa_s').value=s; document.getElementById('td2').textContent=fmt(s); }
+});
+
+function g(id) { return document.getElementById(id).value.trim(); }
+
+function saveEntry() {
+  const produkt = g('produkt');
+  if (!produkt) { alert('Bitte Produktname eingeben.'); return; }
+  entries.push({
+    id: Date.now(),
+    datum: g('datum'), beobachter: g('beobachter'), schicht: g('schicht'),
+    produkt, maskierart: 'Klebeband', bauteil: g('bauteil'),
+    position: g('position'), beschreibung: g('beschreibung'),
+    prozesszeit_s: parseInt(document.getElementById('pz_s').value)||0,
+    pausezeit_s: parseInt(document.getElementById('pa_s').value)||0,
+    messungen: g('messungen'), taktzeit: g('taktzeit'),
+    mitarbeiter: g('mitarbeiter'), seite: g('seite'),
+    fehler: g('fehler'), bemerkungen: g('bemerkungen')
+  });
+  localStorage.setItem('maskier_final', JSON.stringify(entries));
+  renderTable();
+  resetForm();
+}
+
+function resetForm() {
+  ['beobachter','schicht','produkt','bauteil','position','beschreibung',
+   'messungen','taktzeit','mitarbeiter','seite','fehler','bemerkungen'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = (id==='messungen'||id==='mitarbeiter') ? '1' : '';
+  });
+  resetTimer('proc'); resetTimer('pause');
+}
+
+function renderTable() {
+  const b = document.getElementById('entries-body');
+  document.getElementById('counter').textContent = entries.length;
+  if (!entries.length) {
+    b.innerHTML = '<tr><td colspan="9" class="empty-state">Noch keine Eintr&auml;ge.</td></tr>'; return;
+  }
+  b.innerHTML = entries.map((e, i) => `<tr>
+    <td>${i+1}</td>
+    <td>${e.datum||'&#8211;'}</td>
+    <td style="font-weight:600;">${e.produkt}</td>
+    <td>${e.bauteil ? '<span class="badge">'+e.bauteil+'</span>' : '&#8211;'}</td>
+    <td>${e.position||'&#8211;'}</td>
+    <td>${e.prozesszeit_s||'&#8211;'}</td>
+    <td>${e.pausezeit_s||'&#8211;'}</td>
+    <td>${e.mitarbeiter||'&#8211;'}</td>
+    <td><button class="btn-danger" onclick="del(${e.id})">&#10005;</button></td>
+  </tr>`).join('');
+}
+
+function del(id) {
+  entries = entries.filter(e => e.id !== id);
+  localStorage.setItem('maskier_final', JSON.stringify(entries));
+  renderTable();
+}
+function clearAll() {
+  if (confirm('Wirklich alle Eintr\u00e4ge l\u00f6schen?')) {
+    entries = []; localStorage.removeItem('maskier_final'); renderTable();
+  }
+}
+function exportCSV() {
+  if (!entries.length) { alert('Keine Daten.'); return; }
+  const h = ['Nr','Datum','Beobachter','Schicht','Produkt','Maskierart','Bauteil','Position',
+    'Beschreibung','Prozesszeit_s','Pausezeit_s','Messungen','Taktzeit_s','Mitarbeiter','Seite','Fehler','Bemerkungen'];
+  const r = entries.map((e,i) => [i+1,e.datum,e.beobachter,e.schicht,e.produkt,e.maskierart,
+    e.bauteil,e.position,e.beschreibung,e.prozesszeit_s,e.pausezeit_s,e.messungen,e.taktzeit,
+    e.mitarbeiter,e.seite,e.fehler,e.bemerkungen].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"'));
+  const csv = [h.join(';'), ...r.map(x=>x.join(';'))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'maskierprozesse_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+function exportJSON() {
+  if (!entries.length) { alert('Keine Daten.'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(entries,null,2)], {type:'application/json'}));
+  a.download = 'maskierprozesse_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+document.getElementById('datum').value = new Date().toISOString().slice(0,10);
+renderTable();
+</script>
+</body>
+</html>
