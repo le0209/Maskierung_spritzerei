@@ -31,6 +31,8 @@
   .timer-disp { font-size: 24px; font-weight: 700; color: #1a3a5c; min-width: 72px; font-variant-numeric: tabular-nums; }
   .timer-btn { padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid #cdd5de; background: #f0f2f5; color: #333; cursor: pointer; }
   .timer-btn.running { background: #fdecea; color: #c0392b; border-color: #f5c6c2; }
+  .chk { display:flex; align-items:center; gap:6px; font-size:12px; color:#333; cursor:pointer; padding:3px 0; }
+  .chk input[type=checkbox] { width:15px; height:15px; cursor:pointer; accent-color:#1a3a5c; flex-shrink:0; margin:0; }
   .maskier-pill { background: #e8f5fe; color: #1560a8; border: 1px solid #b3d9f5; border-radius: 6px; padding: 7px 12px; font-size: 13px; font-weight: 600; display: inline-block; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th { text-align: left; color: #555; font-weight: 600; font-size: 11px; border-bottom: 1px solid #dde3ea; padding: 6px 8px; background: #f8f9fa; }
@@ -64,17 +66,58 @@
 <div class="card">
   <p class="sec-title">&#128230; Produkt &amp; Maskierposition</p>
   <div class="g2" style="margin-bottom:10px;">
-    <div class="f"><label>Produktname</label><input type="text" id="produkt" placeholder="z.B. Frontsto&szlig;f&auml;nger ID Buzz"></div>
-    <div class="f"><label>Maskierungsart</label><div class="maskier-pill">&#127991; Klebeband</div></div>
+    <div class="f"><label>Produktname</label>
+      <select id="produkt">
+        <option value="">&#8211; w&#228;hlen &#8211;</option>
+        <option>VW382 Golf PA STF</option>
+        <option>VW382 Golf R-Modell STF</option>
+        <option>VN41T T7 PA STF</option>
+        <option>VN41T T7 L1</option>
+        <option>VN41T T7 STF L2</option>
+        <option>VW418 ID.Buzz STF People</option>
+        <option>VW418 ID.Buzz L&#252;Gi People</option>
+        <option>VW418 ID.Buzz STF GTX</option>
+        <option>VW412</option>
+        <option>R232 STF Entry</option>
+        <option>R232 STF Performance</option>
+      </select>
+    </div>
+    <div class="f"><label>Maskierungsart</label>
+      <select id="maskierart">
+        <option value="">&#8211; w&#228;hlen &#8211;</option>
+        <option>Klebeband gr&#252;n</option>
+        <option>Klebeband neutral</option>
+      </select>
+    </div>
   </div>
   <div class="g2" style="margin-bottom:10px;">
     <div class="f"><label>Bauteil</label>
       <select id="bauteil">
         <option value="">&#8211; w&#228;hlen &#8211;</option>
-        <option>Front</option><option>Heck</option>
+        <option>Front</option>
+        <option>Heck</option>
+        <option>Dachkantenspoiler</option>
+        <option>Serviceblende</option>
       </select>
     </div>
-    <div class="f"><label>Maskierposition</label><input type="text" id="position" placeholder="z.B. PDC-Bohrungen links"></div>
+    <div class="f" style="grid-column:1/-1;">
+      <label style="margin-bottom:6px;font-weight:600;">Maskierposition <span style="font-size:11px;color:#888;">(Mehrfachauswahl m&#246;glich)</span></label>
+      <div id="position-checks" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;">
+        <label class="chk"><input type="checkbox" value="KSS-Radarbereich"> KSS-Radarbereich</label>
+        <label class="chk"><input type="checkbox" value="VIP-Antenne"> VIP-Antenne</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Radlaufflansch"> Klebeflächen Radlaufflansch</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen VIP-Steuergerät"> Klebeflächen VIP-Steuerger&#228;t</label>
+        <label class="chk"><input type="checkbox" value="Schweiß-/Klebefläche PLA"> Schwei&szlig;-/Klebefläche PLA</label>
+        <label class="chk"><input type="checkbox" value="Klebefläche AVC"> Klebefläche AVC</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Leitungssatz"> Klebeflächen Leitungssatz</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Stützteile"> Klebeflächen St&#252;tzteile</label>
+        <label class="chk"><input type="checkbox" value="umlaufende Klebefläche"> umlaufende Klebefläche</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Sidemarker"> Klebeflächen Sidemarker</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Grundträger oben"> Klebeflächen Grundtr&#228;ger oben</label>
+        <label class="chk"><input type="checkbox" value="Klebeflächen Radlaufhalter"> Klebeflächen Radlaufhalter</label>
+      </div>
+      <input type="hidden" id="position">
+    </div>
   </div>
   <div class="f">
     <label>Beschreibung / Besonderheiten</label>
@@ -109,8 +152,8 @@
     </div>
   </div>
   <div class="g2">
-    <div class="f"><label>Messungen / Durchl&auml;ufe</label><input type="number" id="messungen" min="1" value="1"></div>
     <div class="f"><label>Taktzeit (s)</label><input type="number" id="taktzeit" placeholder="Sekunden"></div>
+    <div class="f"></div>
   </div>
 </div>
 
@@ -206,6 +249,10 @@ document.getElementById('pa_disp').addEventListener('input', function() {
 });
 
 function g(id) { return document.getElementById(id).value.trim(); }
+function getChecked() {
+  return Array.from(document.querySelectorAll('#position-checks input[type=checkbox]:checked'))
+    .map(cb => cb.value).join(', ');
+}
 
 function saveEntry() {
   const produkt = g('produkt');
@@ -214,8 +261,8 @@ function saveEntry() {
     id: Date.now(),
     uhrzeit: new Date().toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit', second:'2-digit'}),
     datum: g('datum'), beobachter: g('beobachter'), schicht: g('schicht'),
-    produkt, maskierart: 'Klebeband', bauteil: g('bauteil'),
-    position: g('position'), beschreibung: g('beschreibung'),
+    produkt, maskierart: g('maskierart'), bauteil: g('bauteil'),
+    position: getChecked(), beschreibung: g('beschreibung'),
     prozesszeit_s: parseInt(document.getElementById('pz_s').value)||0,
     pausezeit_s: parseInt(document.getElementById('pa_s').value)||0,
     messungen: g('messungen'), taktzeit: g('taktzeit'),
@@ -228,10 +275,12 @@ function saveEntry() {
 }
 
 function resetForm() {
-  ['beobachter','schicht','produkt','bauteil','position','beschreibung',
-   'messungen','taktzeit','mitarbeiter','seite','fehler','bemerkungen'].forEach(id => {
+  document.querySelectorAll('#position-checks input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.getElementById('position').value = '';
+  ['beobachter','schicht','produkt','maskierart','bauteil','beschreibung',
+   'taktzeit','mitarbeiter','seite','fehler','bemerkungen'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = (id==='messungen'||id==='mitarbeiter') ? '1' : '';
+    if (el) el.value = (id==='mitarbeiter') ? '1' : '';
   });
   resetTimer('proc'); resetTimer('pause');
 }
@@ -269,9 +318,9 @@ function clearAll() {
 function exportCSV() {
   if (!entries.length) { alert('Keine Daten.'); return; }
   const h = ['Nr','Datum','Uhrzeit','Beobachter','Schicht','Produkt','Maskierart','Bauteil','Position',
-    'Beschreibung','Prozesszeit_s','Pausezeit_s','Messungen','Taktzeit_s','Mitarbeiter','Seite','Fehler','Bemerkungen'];
+    'Beschreibung','Prozesszeit_s','Pausezeit_s','Taktzeit_s','Mitarbeiter','Seite','Fehler','Bemerkungen'];
   const r = entries.map((e,i) => [i+1,e.datum,e.uhrzeit,e.beobachter,e.schicht,e.produkt,e.maskierart,
-    e.bauteil,e.position,e.beschreibung,e.prozesszeit_s,e.pausezeit_s,e.messungen,e.taktzeit,
+    e.bauteil,e.position,e.beschreibung,e.prozesszeit_s,e.pausezeit_s,e.taktzeit,
     e.mitarbeiter,e.seite,e.fehler,e.bemerkungen].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"'));
   const csv = [h.join(';'), ...r.map(x=>x.join(';'))].join('\n');
   const a = document.createElement('a');
