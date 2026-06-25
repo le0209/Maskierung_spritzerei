@@ -141,7 +141,7 @@
   <div class="scroll-table">
     <table>
       <thead><tr>
-        <th>#</th><th>Datum</th><th>Produkt</th><th>Bauteil</th><th>Position</th>
+        <th>#</th><th>Datum</th><th>Uhrzeit</th><th>Produkt</th><th>Bauteil</th><th>Position</th>
         <th>Prozess (s)</th><th>Pause (s)</th><th>MA</th><th></th>
       </tr></thead>
       <tbody id="entries-body">
@@ -212,6 +212,7 @@ function saveEntry() {
   if (!produkt) { alert('Bitte Produktname eingeben.'); return; }
   entries.push({
     id: Date.now(),
+    uhrzeit: new Date().toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit', second:'2-digit'}),
     datum: g('datum'), beobachter: g('beobachter'), schicht: g('schicht'),
     produkt, maskierart: 'Klebeband', bauteil: g('bauteil'),
     position: g('position'), beschreibung: g('beschreibung'),
@@ -244,6 +245,7 @@ function renderTable() {
   b.innerHTML = entries.map((e, i) => `<tr>
     <td>${i+1}</td>
     <td>${e.datum||'&#8211;'}</td>
+    <td>${e.uhrzeit||'&#8211;'}</td>
     <td style="font-weight:600;">${e.produkt}</td>
     <td>${e.bauteil ? '<span class="badge">'+e.bauteil+'</span>' : '&#8211;'}</td>
     <td>${e.position||'&#8211;'}</td>
@@ -266,9 +268,9 @@ function clearAll() {
 }
 function exportCSV() {
   if (!entries.length) { alert('Keine Daten.'); return; }
-  const h = ['Nr','Datum','Beobachter','Schicht','Produkt','Maskierart','Bauteil','Position',
+  const h = ['Nr','Datum','Uhrzeit','Beobachter','Schicht','Produkt','Maskierart','Bauteil','Position',
     'Beschreibung','Prozesszeit_s','Pausezeit_s','Messungen','Taktzeit_s','Mitarbeiter','Seite','Fehler','Bemerkungen'];
-  const r = entries.map((e,i) => [i+1,e.datum,e.beobachter,e.schicht,e.produkt,e.maskierart,
+  const r = entries.map((e,i) => [i+1,e.datum,e.uhrzeit,e.beobachter,e.schicht,e.produkt,e.maskierart,
     e.bauteil,e.position,e.beschreibung,e.prozesszeit_s,e.pausezeit_s,e.messungen,e.taktzeit,
     e.mitarbeiter,e.seite,e.fehler,e.bemerkungen].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"'));
   const csv = [h.join(';'), ...r.map(x=>x.join(';'))].join('\n');
